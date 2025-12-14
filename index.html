@@ -330,6 +330,66 @@
       font-weight:800; padding:2px 6px; border-radius:8px;
       border:1px solid var(--border); background: rgba(0,0,0,.18); color: var(--text);
     }
+
+    /* Auth Modal */
+    .authModal{
+      position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:100;
+      display:none; align-items:center; justify-content:center; padding:18px;
+    }
+    .authModal.show{display:flex}
+    .authBox{
+      background: var(--panel);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      max-width: 420px;
+      width: 100%;
+    }
+    .authBox h2{margin:0 0 8px; font-size: 22px}
+    .authBox p{margin:0 0 18px; color: var(--muted); font-size: 14px}
+    .authForm{display:grid; gap:12px}
+    .authForm input{
+      width:100%; padding:12px 14px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(0,0,0,.22);
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+    .authForm input:focus{border-color:var(--brand)}
+    .authForm button{
+      padding:12px; font-size:15px;
+      margin-top:6px;
+    }
+    .authSwitch{
+      margin-top:14px; text-align:center;
+      color:var(--muted); font-size:13px;
+    }
+    .authSwitch a{
+      color:var(--brand); cursor:pointer; text-decoration:underline;
+    }
+    .authError{
+      padding:10px 12px;
+      border-radius:12px;
+      background:rgba(255,92,115,.15);
+      border:1px solid rgba(255,92,115,.45);
+      color:var(--bad);
+      font-size:13px;
+      display:none;
+    }
+    .authError.show{display:block}
+    .userInfo{
+      display:flex; align-items:center; gap:10px;
+      padding:8px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(110,168,254,.12);
+      font-size:13px;
+      color:var(--text);
+    }
+    .userInfo strong{color:var(--brand)}
   </style>
 </head>
 <body>
@@ -346,10 +406,14 @@
       <div class="btns">
         <button class="mutedBtn" id="btnResetQ">Reset This Q</button>
         <button class="danger" id="btnResetAll">Reset All</button>
+        <button class="ok" id="btnLogout" style="display:none">Logout</button>
       </div>
     </div>
 
     <div class="row">
+      <div class="pill" id="userInfoPill" style="display:none">
+        <span>👤</span> <strong id="usernameDisplay">User</strong>
+      </div>
       <div class="pill"><span>Q</span> <strong id="pillQ">1</strong><span>/</span><strong id="pillTotal">0</strong></div>
       <div class="pill"><span>Score</span> <strong id="pillScore">0</strong></div>
       <div class="pill"><span>Correct</span> <strong id="pillCorrect">0</strong></div>
@@ -426,10 +490,228 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Auth Modal -->
+  <div class="authModal" id="authModal">
+    <div class="authBox">
+      <div id="loginForm">
+        <h2>Login to Quiz</h2>
+        <p>Sign in to track your progress across devices</p>
+        <div class="authError" id="loginError"></div>
+        <form class="authForm" onsubmit="return false;">
+          <input type="text" id="loginUsername" placeholder="Username" required autocomplete="username">
+          <input type="password" id="loginPassword" placeholder="Password" required autocomplete="current-password">
+          <button type="submit" class="primary" id="btnLogin">Login</button>
+        </form>
+        <div class="authSwitch">
+          Don't have an account? <a id="showSignup">Sign up</a>
+        </div>
+      </div>
+
+      <div id="signupForm" style="display:none">
+        <h2>Create Account</h2>
+        <p>Sign up to save your progress in the cloud</p>
+        <div class="authError" id="signupError"></div>
+        <form class="authForm" onsubmit="return false;">
+          <input type="text" id="signupUsername" placeholder="Username" required autocomplete="username">
+          <input type="email" id="signupEmail" placeholder="Email" required autocomplete="email">
+          <input type="password" id="signupPassword" placeholder="Password (min 6 chars)" required autocomplete="new-password">
+          <button type="submit" class="primary" id="btnSignup">Sign Up</button>
+        </form>
+        <div class="authSwitch">
+          Already have an account? <a id="showLogin">Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ✅ Load your 300 questions (same folder) -->
   <script src="questions.js"></script>
 
   <script>
+    // --- API Integration ---
+    const API_BASE = '';  // Same origin
+    let currentUser = null;
+    let isAuthenticated = false;
+
+    // Check authentication on load
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${API_BASE}/api/me`, { credentials: 'include' });
+        const data = await res.json();
+        
+        if (data.authenticated && data.user) {
+          currentUser = data.user;
+          isAuthenticated = true;
+          showUserInfo(data.user);
+          await loadProgressFromServer();
+        } else {
+          showAuthModal();
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        showAuthModal();
+      }
+    }
+
+    function showUserInfo(user) {
+      document.getElementById('userInfoPill').style.display = '';
+      document.getElementById('usernameDisplay').textContent = user.username;
+      document.getElementById('btnLogout').style.display = '';
+      hideAuthModal();
+    }
+
+    function showAuthModal() {
+      document.getElementById('authModal').classList.add('show');
+    }
+
+    function hideAuthModal() {
+      document.getElementById('authModal').classList.remove('show');
+    }
+
+    // Auth handlers
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+
+      errorEl.classList.remove('show');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          errorEl.textContent = data.error;
+          errorEl.classList.add('show');
+        } else {
+          currentUser = data.user;
+          isAuthenticated = true;
+          showUserInfo(data.user);
+          await loadProgressFromServer();
+          renderQuestion();
+          renderGrid();
+        }
+      } catch (err) {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.add('show');
+      }
+    });
+
+    document.getElementById('btnSignup').addEventListener('click', async () => {
+      const username = document.getElementById('signupUsername').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const errorEl = document.getElementById('signupError');
+
+      errorEl.classList.remove('show');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, email, password })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          errorEl.textContent = data.error;
+          errorEl.classList.add('show');
+        } else {
+          currentUser = data.user;
+          isAuthenticated = true;
+          showUserInfo(data.user);
+          popToast('Account created! Welcome!');
+          renderQuestion();
+          renderGrid();
+        }
+      } catch (err) {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.classList.add('show');
+      }
+    });
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      if (!confirm('Logout? Your progress is saved on the server.')) return;
+      
+      await fetch(`${API_BASE}/api/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      currentUser = null;
+      isAuthenticated = false;
+      document.getElementById('userInfoPill').style.display = 'none';
+      document.getElementById('btnLogout').style.display = 'none';
+      state = makeFreshState();
+      showAuthModal();
+      popToast('Logged out successfully');
+    });
+
+    document.getElementById('showSignup').addEventListener('click', () => {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('signupForm').style.display = 'block';
+      document.getElementById('loginError').classList.remove('show');
+    });
+
+    document.getElementById('showLogin').addEventListener('click', () => {
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('signupError').classList.remove('show');
+    });
+
+    async function loadProgressFromServer() {
+      if (!isAuthenticated) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/progress`, { credentials: 'include' });
+        const data = await res.json();
+
+        if (data.progress) {
+          // Convert server format to local state format
+          for (const [qId, prog] of Object.entries(data.progress)) {
+            state.perQ[qId] = {
+              selected: prog.selected,
+              checked: prog.checked,
+              result: prog.result,
+              flagged: prog.flagged,
+              countedCorrect: prog.countedCorrect
+            };
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load progress:', err);
+      }
+    }
+
+    async function saveProgressToServer(questionId, qState) {
+      if (!isAuthenticated) return;
+
+      try {
+        await fetch(`${API_BASE}/api/progress/${questionId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            selected: qState.selected,
+            checked: qState.checked,
+            result: qState.result,
+            flagged: qState.flagged,
+            countedCorrect: qState.countedCorrect
+          })
+        });
+      } catch (err) {
+        console.error('Failed to save progress:', err);
+      }
+    }
+
     // --- Safety: make sure QUESTIONS exists ---
     if (typeof QUESTIONS === "undefined") {
       alert("questions.js not loaded. Make sure questions.js is in the same folder and loaded via a server.");
@@ -494,9 +776,7 @@
     } else {
       pillTotal.textContent = QUESTIONS.length;
       normalizeStateToQuestions();
-      renderQuestion();
-      renderGrid();
-      updateScoreUI();
+      checkAuth(); // Check authentication first
     }
 
     function makeFreshState(){
@@ -656,6 +936,7 @@
       }
 
       saveState();
+      saveProgressToServer(q.id, qState); // Save to server
       showFeedback(q, qState);
       renderQuestion(); // redraw choice styling + stats
       renderGrid();
@@ -692,17 +973,30 @@
       const q = QUESTIONS[currentIndex];
       const keepFlag = state.perQ[q.id]?.flagged || false;
       state.perQ[q.id] = { selected:null, checked:false, result:null, flagged: keepFlag, countedCorrect:false };
-      saveState();
+      if (isAuthenticated) {
+        fetch(`${API_BASE}/api/progress/${q.id}/reset`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+      }
       renderQuestion();
       renderGrid();
       popToast("Reset this question.");
     }
 
-    function resetAll(){
+    async function resetAll(){
       if (!confirm("Reset ALL progress? This clears selections/checks for all questions.")) return;
       state = makeFreshState();
       currentIndex = 0;
       normalizeStateToQuestions();
+      saveState();
+      if (isAuthenticated) {
+        await fetch(`${API_BASE}/api/progress/reset`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+      saveProgressToServer(q.id, qState); // Save to server
+      }teToQuestions();
       saveState();
       renderQuestion();
       renderGrid();
