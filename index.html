@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OS Lab Quiz — 300 MCQs</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#121a32;
+      --panel2:#0f1730;
+      --text:#e8edff;
+      --muted:#a7b0d6;
+      --brand:#6ea8fe;
+      --ok:#2ecc71;
+      --bad:#ff5c73;
+      --warn:#f5c542;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 14px 40px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 30% -10%, rgba(110,168,254,.28), transparent 55%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(46,204,113,.18), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .wrap{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 18px;
+      display:grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px){ .wrap{grid-template-columns:1fr} }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    header.card{
+      grid-column: 1 / -1;
+      padding: 18px 18px 14px;
+    }
+    .top{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .title{ display:flex; align-items:center; gap:12px; }
+    .badge{
+      padding: 6px 10px;
+      border:1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(110,168,254,.12);
+      font-weight: 800;
+      letter-spacing:.2px;
+    }
+    .h1{ margin:0; font-size: 20px; line-height:1.2; letter-spacing:.2px; }
+    .sub{ margin:6px 0 0; color: var(--muted); font-size: 13px; }
+
+    .row{
+      margin-top: 12px;
+      display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    }
+    .pill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-size: 13px;
+      display:flex; gap:8px; align-items:center;
+    }
+    .pill strong{color:var(--text)}
+    .progress{
+      flex: 1; min-width: 220px; height: 10px;
+      background: rgba(255,255,255,.08);
+      border-radius: 999px; overflow:hidden;
+      border:1px solid var(--border);
+    }
+    .bar{
+      height:100%; width:0%;
+      background: linear-gradient(90deg, var(--brand), rgba(46,204,113,.85));
+      transition: width .25s ease;
+    }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 800;
+      letter-spacing:.2px;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    button:hover{background: rgba(255,255,255,.10)}
+    button:active{transform: translateY(1px)}
+    .primary{background: rgba(110,168,254,.18); border-color: rgba(110,168,254,.35)}
+    .danger{background: rgba(255,92,115,.16); border-color: rgba(255,92,115,.35)}
+    .ok{background: rgba(46,204,113,.16); border-color: rgba(46,204,113,.35)}
+    .mutedBtn{opacity:.92}
+
+    .main.card{padding: 16px}
+    .side.card{padding: 16px}
+
+    .qhead{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .qno{ font-size: 13px; color: var(--muted); margin:0 0 6px; }
+    .qtext{ margin:0; font-size: 18px; line-height: 1.35; }
+
+    .flag{
+      display:flex; align-items:center; gap:8px;
+      font-size: 13px; color: var(--muted);
+      cursor:pointer; user-select:none;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+    }
+    .flag[data-on="1"]{
+      color: var(--warn);
+      border-color: rgba(245,197,66,.45);
+      background: rgba(245,197,66,.12);
+    }
+
+    .choices{ margin-top: 14px; display:grid; gap:10px; }
+    .choice{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+      cursor:pointer;
+      transition: background .15s ease, border-color .15s ease, transform .08s ease;
+      position: relative;
+    }
+    .choice:hover{background: rgba(255,255,255,.06)}
+    .choice:active{transform: translateY(1px)}
+    .letter{
+      width: 28px; height: 28px;
+      display:grid; place-items:center;
+      border-radius: 10px;
+      border:1px solid var(--border);
+      color: var(--muted);
+      font-weight: 900;
+      flex: 0 0 auto;
+      background: rgba(255,255,255,.04);
+    }
+    .choiceText{color: var(--text); line-height:1.25}
+    .tag{
+      position:absolute; right:10px; top:10px;
+      font-size: 12px; padding: 4px 8px;
+      border-radius: 999px; border:1px solid var(--border);
+      background: rgba(0,0,0,.18); color: var(--muted);
+      display:none;
+    }
+    .choice[data-state="correct"]{
+      border-color: rgba(46,204,113,.55);
+      background: rgba(46,204,113,.10);
+    }
+    .choice[data-state="wrong"]{
+      border-color: rgba(255,92,115,.55);
+      background: rgba(255,92,115,.10);
+    }
+    .choice[data-state="rightAnswer"]{
+      border-color: rgba(46,204,113,.55);
+    }
+    .choice[data-state="correct"] .tag{display:block; color: var(--ok); border-color: rgba(46,204,113,.55); background: rgba(46,204,113,.10)}
+    .choice[data-state="wrong"] .tag{display:block; color: var(--bad); border-color: rgba(255,92,115,.55); background: rgba(255,92,115,.10)}
+    .choice[data-state="rightAnswer"] .tag{display:block; color: var(--ok); border-color: rgba(46,204,113,.55); background: rgba(46,204,113,.10)}
+    .choice .tag::before{content:" ";}
+
+    .feedback{
+      margin-top: 14px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      display:none;
+    }
+    .feedback.show{display:block}
+    .fbTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-bottom: 8px;
+    }
+    .fbBadge{
+      font-weight: 900;
+      border:1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+    }
+    .fbBadge.ok{color: var(--ok); border-color: rgba(46,204,113,.55); background: rgba(46,204,113,.10)}
+    .fbBadge.bad{color: var(--bad); border-color: rgba(255,92,115,.55); background: rgba(255,92,115,.10)}
+    .feedback h4{
+      margin:0;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    .feedback p{margin:8px 0 0; color:var(--text); line-height:1.35}
+    .correctLine{
+      margin-top:8px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(46,204,113,.35);
+      background: rgba(46,204,113,.08);
+      color: var(--text);
+      display:none;
+    }
+    .correctLine.show{display:block}
+
+    .bigNavRow{
+      margin-top: 16px;
+      display:flex; gap:12px;
+      justify-content:space-between;
+    }
+    .bigNavBtn{
+      flex: 1;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 900;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      cursor:pointer;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .bigNavBtn:hover{
+      background: rgba(255,255,255,.14);
+      transform: translateY(-1px);
+    }
+    .bigNavBtn:active{transform: translateY(1px)}
+    .bigNavBtn.primary{
+      background: rgba(110,168,254,.22);
+      border-color: rgba(110,168,254,.45);
+    }
+    .bigNavBtn.primary:hover{
+      background: rgba(110,168,254,.32);
+    }
+
+    .navRow{
+      margin-top: 14px;
+      display:flex; gap:10px; flex-wrap:wrap;
+      justify-content:space-between; align-items:center;
+    }
+    .mini{
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.16);
+    }
+
+    .gridTitle{
+      margin:0 0 10px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing:.2px;
+    }
+    .two{
+      display:grid; grid-template-columns: 1fr 1fr; gap:10px;
+      margin-bottom: 10px;
+    }
+    @media (max-width: 520px){ .two{grid-template-columns:1fr} }
+    select, input[type="search"]{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      outline:none;
+    }
+
+    .qgrid{
+      display:grid;
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+    }
+    @media (max-width: 520px){ .qgrid{grid-template-columns: repeat(8, minmax(0, 1fr))} }
+    .qbtn{
+      padding: 8px 0;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 12px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.14);
+      color: var(--muted);
+      cursor:pointer;
+    }
+    .qbtn[data-status="unseen"]{opacity:.9}
+    .qbtn[data-status="answered"]{color: var(--text); border-color: rgba(110,168,254,.40)}
+    .qbtn[data-status="correct"]{color: var(--text); border-color: rgba(46,204,113,.55); background: rgba(46,204,113,.10)}
+    .qbtn[data-status="wrong"]{color: var(--text); border-color: rgba(255,92,115,.55); background: rgba(255,92,115,.10)}
+    .qbtn[data-flag="1"]{outline: 2px solid rgba(245,197,66,.55)}
+    .qbtn.current{
+      border-color: rgba(255,255,255,.45);
+      color: var(--text);
+    }
+
+    .toast{
+      position: fixed; right: 18px; bottom: 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border:1px solid var(--border);
+      background: rgba(15,23,48,.92);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      display:none;
+      max-width: 360px;
+      z-index: 50;
+    }
+    .toast.show{display:block}
+    .smallNote{margin:10px 0 0; font-size: 12px; color: var(--muted); line-height:1.35}
+    .kbd{
+      font-weight:800; padding:2px 6px; border-radius:8px;
+      border:1px solid var(--border); background: rgba(0,0,0,.18); color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="card">
+    <div class="top">
+      <div class="title">
+        <div class="badge">MCQ Trainer</div>
+        <div>
+          <h1 class="h1">OS Lab Quiz — 300 MCQs</h1>
+          <p class="sub">Click an option → instant Correct/Wrong + explanation. Shortcuts: <span class="kbd">←</span>/<span class="kbd">→</span> for Prev/Next.</p>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="mutedBtn" id="btnResetQ">Reset This Q</button>
+        <button class="danger" id="btnResetAll">Reset All</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="pill"><span>Q</span> <strong id="pillQ">1</strong><span>/</span><strong id="pillTotal">0</strong></div>
+      <div class="pill"><span>Score</span> <strong id="pillScore">0</strong></div>
+      <div class="pill"><span>Correct</span> <strong id="pillCorrect">0</strong></div>
+      <div class="pill"><span>Wrong</span> <strong id="pillWrong">0</strong></div>
+
+      <div class="progress" aria-label="Progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <main class="card main">
+      <div class="qhead">
+        <div>
+          <p class="qno" id="qMeta">Section • Question</p>
+          <p class="qtext" id="qText">Loading…</p>
+        </div>
+        <div class="flag" id="flagBtn" data-on="0" title="Flag this question">
+          <span>⚑</span><span id="flagLabel">Flag</span>
+        </div>
+      </div>
+
+      <div class="choices" id="choices"></div>
+
+      <!-- Always show explanation AFTER user clicks an option -->
+      <div class="feedback" id="feedbackBox">
+        <div class="fbTop">
+          <div class="fbBadge" id="fbBadge">—</div>
+          <div class="mini" id="fbMini">Click an option to check</div>
+        </div>
+
+        <h4>Explanation</h4>
+        <p id="fbWhy"></p>
+
+        <div class="correctLine" id="correctLine"></div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="bigNavRow">
+        <button class="bigNavBtn" id="btnPrev">◀ Previous</button>
+        <button class="bigNavBtn primary" id="btnNext">Next ▶</button>
+      </div>
+
+      <div class="navRow">
+        <div class="mini" id="statusText">Status: Unanswered</div>
+        <div class="btns">
+          <button id="btnJumpFlagged">Jump Flagged</button>
+          <button id="btnJumpWrong">Jump Wrong</button>
+          <button id="btnJumpUnanswered">Jump Unanswered</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="card side">
+      <h3 class="gridTitle">Jump to Question</h3>
+
+      <div class="two">
+        <input id="searchBox" type="search" placeholder="Search question text…" />
+        <select id="filterSelect">
+          <option value="all">Show: All</option>
+          <option value="flagged">Flagged</option>
+          <option value="unanswered">Unanswered</option>
+          <option value="correct">Correct</option>
+          <option value="wrong">Wrong</option>
+        </select>
+      </div>
+
+      <div class="qgrid" id="qGrid"></div>
+
+      <p class="smallNote">
+        Progress saves automatically (browser localStorage). Click option = graded attempt.
+      </p>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ✅ Load your 300 questions (same folder) -->
+  <script src="questions.js"></script>
+
+  <script>
+    // --- Safety: make sure QUESTIONS exists ---
+    if (typeof QUESTIONS === "undefined") {
+      alert("questions.js not loaded. Make sure questions.js is in the same folder and loaded via a server.");
+    }
+
+    // --- App State ---
+    const STORAGE_KEY = "oslab_mcq_state_v2_instant";
+    let state = loadState() || makeFreshState();
+    let currentIndex = clamp(state.currentIndex ?? 0, 0, (QUESTIONS?.length || 1) - 1);
+
+    // --- Elements ---
+    const pillQ = document.getElementById("pillQ");
+    const pillTotal = document.getElementById("pillTotal");
+    const pillScore = document.getElementById("pillScore");
+    const pillCorrect = document.getElementById("pillCorrect");
+    const pillWrong = document.getElementById("pillWrong");
+    const progressBar = document.getElementById("progressBar");
+
+    const qMeta = document.getElementById("qMeta");
+    const qText = document.getElementById("qText");
+    const choicesEl = document.getElementById("choices");
+    const statusText = document.getElementById("statusText");
+
+    const flagBtn = document.getElementById("flagBtn");
+    const flagLabel = document.getElementById("flagLabel");
+
+    const qGrid = document.getElementById("qGrid");
+    const searchBox = document.getElementById("searchBox");
+    const filterSelect = document.getElementById("filterSelect");
+
+    const feedbackBox = document.getElementById("feedbackBox");
+    const fbBadge = document.getElementById("fbBadge");
+    const fbMini = document.getElementById("fbMini");
+    const fbWhy = document.getElementById("fbWhy");
+    const correctLine = document.getElementById("correctLine");
+
+    const toast = document.getElementById("toast");
+
+    // Buttons
+    document.getElementById("btnPrev").addEventListener("click", () => go(-1));
+    document.getElementById("btnNext").addEventListener("click", () => go(+1));
+    document.getElementById("btnResetQ").addEventListener("click", resetThis);
+    document.getElementById("btnResetAll").addEventListener("click", resetAll);
+
+    document.getElementById("btnJumpFlagged").addEventListener("click", () => jumpToFirst("flagged"));
+    document.getElementById("btnJumpWrong").addEventListener("click", () => jumpToFirst("wrong"));
+    document.getElementById("btnJumpUnanswered").addEventListener("click", () => jumpToFirst("unanswered"));
+
+    flagBtn.addEventListener("click", toggleFlag);
+    searchBox.addEventListener("input", renderGrid);
+    filterSelect.addEventListener("change", renderGrid);
+
+    // Keyboard nav
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") go(-1);
+      if (e.key === "ArrowRight") go(+1);
+    });
+
+    // --- Init ---
+    if (!QUESTIONS || !QUESTIONS.length) {
+      qText.textContent = "No questions loaded. Ensure questions.js defines const QUESTIONS = [...];";
+    } else {
+      pillTotal.textContent = QUESTIONS.length;
+      normalizeStateToQuestions();
+      renderQuestion();
+      renderGrid();
+      updateScoreUI();
+    }
+
+    function makeFreshState(){
+      return { currentIndex: 0, perQ: {} };
+    }
+
+    function normalizeStateToQuestions(){
+      for (let i=0;i<QUESTIONS.length;i++){
+        const id = QUESTIONS[i].id;
+        if (!state.perQ[id]) {
+          state.perQ[id] = {
+            selected: null,
+            checked: false,
+            result: null,   // "correct" | "wrong" | null
+            flagged: false
+          };
+        }
+      }
+      saveState();
+    }
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch(e){ return null; }
+    }
+    function saveState(){
+      state.currentIndex = currentIndex;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
+
+    function go(delta){
+      if (!QUESTIONS.length) return;
+      currentIndex = clamp(currentIndex + delta, 0, QUESTIONS.length - 1);
+      saveState();
+      renderQuestion();
+      renderGrid();
+      window.scrollTo({top: 0, behavior:"smooth"});
+    }
+
+    function renderQuestion(){
+      const q = QUESTIONS[currentIndex];
+      const qState = state.perQ[q.id];
+
+      pillQ.textContent = q.id;
+      qMeta.textContent = `${q.section} • Question ${q.id}`;
+      qText.textContent = q.q;
+
+      // flag UI
+      setFlagUI(qState.flagged);
+
+      // status text
+      statusText.textContent = "Status: " + getStatusLabel(qState);
+
+      // progress
+      const answered = countAnswered();
+      const pct = Math.round((answered / QUESTIONS.length) * 100);
+      progressBar.style.width = pct + "%";
+
+      // feedback panel
+      if (qState.checked && qState.result){
+        showFeedback(q, qState);
+      } else {
+        feedbackBox.classList.remove("show");
+        fbBadge.className = "fbBadge";
+        fbBadge.textContent = "—";
+        fbMini.textContent = "Click an option to check";
+        fbWhy.textContent = "";
+        correctLine.classList.remove("show");
+        correctLine.textContent = "";
+      }
+
+      // choices
+      choicesEl.innerHTML = "";
+      const letters = ["A","B","C","D"];
+      q.options.forEach((opt, idx) => {
+        const letter = letters[idx];
+
+        const wrap = document.createElement("div");
+        wrap.className = "choice";
+
+        const badge = document.createElement("div");
+        badge.className = "letter";
+        badge.textContent = letter;
+
+        const text = document.createElement("div");
+        text.className = "choiceText";
+        text.textContent = opt;
+
+        const tag = document.createElement("div");
+        tag.className = "tag";
+        tag.textContent = "";
+
+        wrap.appendChild(badge);
+        wrap.appendChild(text);
+        wrap.appendChild(tag);
+
+        // decorate after checked
+        if (qState.checked){
+          const correct = q.answer;
+          if (letter === correct) {
+            wrap.dataset.state = "rightAnswer";
+            tag.textContent = "Correct option";
+          }
+          if (qState.selected === letter && qState.result === "correct") {
+            wrap.dataset.state = "correct";
+            tag.textContent = "You chose";
+          }
+          if (qState.selected === letter && qState.result === "wrong") {
+            wrap.dataset.state = "wrong";
+            tag.textContent = "You chose";
+          }
+        }
+
+        // ✅ Instant check on click
+        wrap.addEventListener("click", () => {
+          instantCheck(letter);
+        });
+
+        choicesEl.appendChild(wrap);
+      });
+
+      updateScoreUI();
+    }
+
+    function getStatusLabel(qState){
+      if (!qState.selected) return "Unanswered";
+      if (!qState.checked) return "Answered (not checked)";
+      if (qState.result === "correct") return "Correct";
+      if (qState.result === "wrong") return "Wrong";
+      return "Unanswered";
+    }
+
+    function instantCheck(letter){
+      const q = QUESTIONS[currentIndex];
+      const qState = state.perQ[q.id];
+
+      // If already checked, allow changing answer? (Here: YES, re-check instantly)
+      qState.selected = letter;
+      qState.checked = true;
+
+      const wasResult = qState.result;
+      const newResult = (letter === q.answer) ? "correct" : "wrong";
+      qState.result = newResult;
+
+      // Score bookkeeping: only count "first correct on this question"
+      // (prevents score going +1 every time you click correct repeatedly)
+      // We store a hidden flag perQ: countedCorrect
+      if (qState.countedCorrect === undefined) qState.countedCorrect = false;
+      if (newResult === "correct" && !qState.countedCorrect) qState.countedCorrect = true;
+      if (newResult === "wrong" && qState.countedCorrect && wasResult === "correct") {
+        // If you change from correct to wrong, keep score logic simple: keep countedCorrect true (score stays).
+        // (You can change this behavior if you want strict grading.)
+      }
+
+      saveState();
+      showFeedback(q, qState);
+      renderQuestion(); // redraw choice styling + stats
+      renderGrid();
+    }
+
+    function showFeedback(q, qState){
+      feedbackBox.classList.add("show");
+      fbWhy.textContent = q.why || "No explanation provided.";
+
+      if (qState.result === "correct"){
+        fbBadge.className = "fbBadge ok";
+        fbBadge.textContent = "✅ Correct";
+        fbMini.textContent = "Nice. You picked the correct option.";
+        correctLine.classList.remove("show");
+        correctLine.textContent = "";
+        popToast("✅ Correct!");
+      } else {
+        fbBadge.className = "fbBadge bad";
+        fbBadge.textContent = "❌ Wrong";
+        fbMini.textContent = `Correct answer is ${q.answer}.`;
+        const correctText = optionTextFor(q, q.answer);
+        correctLine.classList.add("show");
+        correctLine.textContent = `✅ Correct: ${q.answer}) ${correctText}`;
+        popToast(`❌ Wrong. Correct is ${q.answer}.`);
+      }
+    }
+
+    function optionTextFor(q, letter){
+      const idx = ["A","B","C","D"].indexOf(letter);
+      return (idx >= 0 && q.options[idx]) ? q.options[idx] : "";
+    }
+
+    function resetThis(){
+      const q = QUESTIONS[currentIndex];
+      const keepFlag = state.perQ[q.id]?.flagged || false;
+      state.perQ[q.id] = { selected:null, checked:false, result:null, flagged: keepFlag, countedCorrect:false };
+      saveState();
+      renderQuestion();
+      renderGrid();
+      popToast("Reset this question.");
+    }
+
+    function resetAll(){
+      if (!confirm("Reset ALL progress? This clears selections/checks for all questions.")) return;
+      state = makeFreshState();
+      currentIndex = 0;
+      normalizeStateToQuestions();
+      saveState();
+      renderQuestion();
+      renderGrid();
+      popToast("All progress reset.");
+    }
+
+    function toggleFlag(){
+      const q = QUESTIONS[currentIndex];
+      const qState = state.perQ[q.id];
+      qState.flagged = !qState.flagged;
+      setFlagUI(qState.flagged);
+      saveState();
+      renderGrid();
+    }
+
+    function setFlagUI(on){
+      flagBtn.dataset.on = on ? "1" : "0";
+      flagLabel.textContent = on ? "Flagged" : "Flag";
+    }
+
+    function countAnswered(){
+      let n = 0;
+      for (const q of QUESTIONS){
+        if (state.perQ[q.id]?.selected) n++;
+      }
+      return n;
+    }
+
+    function updateScoreUI(){
+      let correct=0, wrong=0;
+      for (const q of QUESTIONS){
+        const s = state.perQ[q.id];
+        if (!s) continue;
+        if (s.result === "correct") correct++;
+        if (s.result === "wrong") wrong++;
+      }
+      pillScore.textContent = correct;   // simple score
+      pillCorrect.textContent = correct;
+      pillWrong.textContent = wrong;
+    }
+
+    function renderGrid(){
+      if (!QUESTIONS.length) return;
+
+      const query = (searchBox.value || "").trim().toLowerCase();
+      const filter = filterSelect.value;
+
+      qGrid.innerHTML = "";
+      for (let i=0;i<QUESTIONS.length;i++){
+        const q = QUESTIONS[i];
+        const s = state.perQ[q.id];
+
+        if (query){
+          const hay = (q.q + " " + q.options.join(" ")).toLowerCase();
+          if (!hay.includes(query)) continue;
+        }
+
+        if (filter === "flagged" && !s.flagged) continue;
+        if (filter === "unanswered" && !!s.selected) continue;
+        if (filter === "correct" && s.result !== "correct") continue;
+        if (filter === "wrong" && s.result !== "wrong") continue;
+
+        const b = document.createElement("button");
+        b.className = "qbtn";
+        b.textContent = q.id;
+
+        let status = "unseen";
+        if (s.selected) status = "answered";
+        if (s.result === "correct") status = "correct";
+        if (s.result === "wrong") status = "wrong";
+        b.dataset.status = status;
+        b.dataset.flag = s.flagged ? "1" : "0";
+
+        if (i === currentIndex) b.classList.add("current");
+
+        b.addEventListener("click", () => {
+          currentIndex = i;
+          saveState();
+          renderQuestion();
+          renderGrid();
+          window.scrollTo({top: 0, behavior: "smooth"});
+        });
+
+        qGrid.appendChild(b);
+      }
+    }
+
+    function jumpToFirst(kind){
+      let idx = -1;
+      for (let i=0;i<QUESTIONS.length;i++){
+        const q = QUESTIONS[i];
+        const s = state.perQ[q.id];
+        if (kind === "flagged" && s.flagged){ idx=i; break; }
+        if (kind === "wrong" && s.result === "wrong"){ idx=i; break; }
+        if (kind === "unanswered" && !s.selected){ idx=i; break; }
+      }
+      if (idx === -1){
+        popToast(`No ${kind} questions found.`);
+        return;
+      }
+      currentIndex = idx;
+      saveState();
+      renderQuestion();
+      renderGrid();
+      window.scrollTo({top: 0, behavior:"smooth"});
+    }
+
+    let toastTimer = null;
+    function popToast(msg){
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+  </script>
+</body>
+</html>
